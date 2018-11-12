@@ -132,17 +132,19 @@ export const setErrorMessage = msg => ({
   type: SET_ERROR_MESSAGE, msg
 });
 
+const modsquadAPI = (path, cb) => json(`/girder/api/v1/modsquad${path}`, cb);
+
 export const fetchConfig = (config = '/config') =>
   (dispatch) => {
     dispatch(requestConfig());
 
-    json(config, (cfg) => {
+    modsquadAPI(config, (cfg) => {
       dispatch(setDataSchema(cfg.dataset_schema));
       dispatch(receiveConfig(cfg));
 
       // now that we have the config information, look up the datasets
       dispatch(requestActiveData());
-      json('/dataset/data', (dat) => {
+      modsquadAPI('/dataset/data', (dat) => {
         dispatch(receiveActiveData(dat));
       })
         .on('error', err => dispatch(setErrorMessage(
@@ -150,7 +152,7 @@ export const fetchConfig = (config = '/config') =>
         )));
 
       dispatch(requestMetadata());
-      json('/dataset/metadata', (metadat) => {
+      modsquadAPI('/dataset/metadata', (metadat) => {
         dispatch(receiveMetadata(metadat));
       })
         .on('error', err => dispatch(setErrorMessage(
@@ -158,7 +160,7 @@ export const fetchConfig = (config = '/config') =>
         )));
 
       dispatch(requestProblems());
-      json('/dataset/problems', (contents) => {
+      modsquadAPI('/dataset/problems', (contents) => {
         dispatch(setExploratoryYVar(contents[0].targets[0].colName));
         dispatch(receiveProblems(contents));
       });
@@ -169,7 +171,7 @@ export const fetchConfig = (config = '/config') =>
   };
 
 export const runTA2 = (port, dispatch, state) => {
-  json(`/session?port=${port}`)
+  modsquadAPI(`/session?port=${port}`)
     .post({}, (session) => {
       const dataURI = state.config.config.dataset_schema;
       // const targetFeatures = state.problems.data[0].targets;
@@ -213,7 +215,7 @@ export const runTA2 = (port, dispatch, state) => {
       // console.log('url: ', url);
 
       dispatch(requestPipelines());
-      json(url).post({}, (resp) => {
+      modsquadAPI(url).post({}, (resp) => {
         // const respComplete = resp.filter(x => x.progressInfo === 'COMPLETED');
         dispatch(receivePipelines(resp));
       })
@@ -287,7 +289,7 @@ export const getPipelinePredictions = (state, dispatch) => {
     };
 
     if (window.__pipepredictcache__[d.solutionId] === undefined) {
-      json(url).post({}, (resp) => {
+      modsquadAPI(url).post({}, (resp) => {
         window.__pipepredictcache__[d.solutionId] = resp;
         cb(resp);
       });
@@ -318,7 +320,7 @@ export const exportPipeline = (pipelineId, state) => {
 
   const url = `/pipeline/export?${query.join('&')}`;
 
-  json(url).post({}, (resp) => {
+  modsquadAPI(url).post({}, (resp) => {
     console.log('export pipeline response:');
     console.log(resp);
   });
