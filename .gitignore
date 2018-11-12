@@ -48,3 +48,7 @@ coverage.xml
 .venv
 venv/
 ENV/
+
+# nginx
+access.log
+nginx.pid

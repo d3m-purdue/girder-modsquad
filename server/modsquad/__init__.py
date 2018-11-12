@@ -1,4 +1,5 @@
 from girder import plugin
+from girder.api.rest import Resource
 
 
 class Modsquad(Resource):
